@@ -117,26 +117,7 @@ class FlipbookSettingsModal(discord.ui.Modal, title="⚙️ Flipbook Settings"):
         await interaction.followup.send(file=file)
 
 
-# ─────────────────────────────────────────
-# VIEW: Static / Flipbook buttons
-# ─────────────────────────────────────────
 
-class TextureTypeView(discord.ui.View):
-    def __init__(self, image_bytes: bytes):
-        super().__init__(timeout=120)
-        self.image_bytes = image_bytes
-
-    @discord.ui.button(label="🖼️ Static", style=discord.ButtonStyle.secondary)
-    async def static_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.stop()
-        img_file = discord.File(io.BytesIO(self.image_bytes), filename="texture.png")
-        await interaction.response.send_message(file=img_file)
-
-    @discord.ui.button(label="🎞️ Flipbook", style=discord.ButtonStyle.primary)
-    async def flipbook_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.stop()
-        modal = FlipbookSettingsModal(image_bytes=self.image_bytes)
-        await interaction.response.send_modal(modal)
 
 
 # ─────────────────────────────────────────
@@ -151,18 +132,8 @@ async def flipbook_create(interaction: discord.Interaction, image: discord.Attac
         return
 
     image_bytes = await image.read()
-
-    embed = discord.Embed(
-        title="🎨 Texture Setup",
-        description="Select the texture type:",
-        color=discord.Color.blurple()
-    )
-    embed.add_field(name="🖼️ Static", value="Send the image as-is", inline=True)
-    embed.add_field(name="🎞️ Flipbook", value="Slice into frames and create a WebP", inline=True)
-    embed.set_image(url=image.url)
-
-    view = TextureTypeView(image_bytes=image_bytes)
-    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+    modal = FlipbookSettingsModal(image_bytes=image_bytes)
+    await interaction.response.send_modal(modal)
 
 
 
